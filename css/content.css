@@ -1,0 +1,87 @@
+:root {
+    --my-sprite-url: url("https://s3-eu-west-1.amazonaws.com/perry-web-public-eu/yad2ext/sprite_maintable_repl.png");
+}
+
+/*
+** file: css/main.css
+** description: custom styling for "html/main.html" file
+*/
+
+/*
+div#main-outer {
+    width: 300px;
+    margin: 5px;
+    background: #DDD;
+    border-radius: 5px;
+}
+
+div#main-inner {
+    padding: 8px;
+}
+
+div#main-title {
+    font-size: 16px;
+    text-align: center;
+    font-weight: bold;
+}
+
+img#main-image {
+    display: block;
+    margin-top: 5px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+div#main-about-text {
+    margin-top: 10px;
+    text-align: center;
+}
+*/
+
+/*body {
+  // background: url('https://media.giphy.com/media/3o7WTDJQVuYwhhuLhC/giphy.gif') !important;
+}
+ 
+#masthead,
+#primary {
+  -webkit-filter: invert(100%);
+  filter: invert(100%);
+  background-color: #fff;
+  padding: 20px !important;
+}
+#masthead {
+  background: none;
+}
+#masthead img, #primary img {
+  -webkit-filter: invert(100%);
+  filter: invert(100%);
+}
+*/
+
+
+/* star styles */
+
+.star-favorite {
+    background-image: var(--my-sprite-url) !important;
+    background-position-x: -10px !important;
+    background-position-y: -457px !important;
+}
+
+.star-blacklist {
+    background-image: var(--my-sprite-url) !important;
+    background-position-x: -52px !important;
+    background-position-y: -457px !important;
+}
+
+.star-seen {
+    background-image: var(--my-sprite-url) !important;
+    background-position-x: -52px !important;
+    background-position-y: -418px !important;
+}
+
+.star-unseen {
+    background-image: var(--my-sprite-url) !important;
+    background-position-x: -10px !important;
+    background-position-y: -418px !important;
+}
+
