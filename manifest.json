@@ -27,6 +27,7 @@
         "css": ["css/content.css"],
         "js": [
             "js/jquery-1.9.1.min.js",
+            "js/debug.js",
             "js/content.js"
         ],
         "matches": ["http://www.yad2.co.il/*"]

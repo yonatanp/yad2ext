@@ -28,15 +28,23 @@ function monitor_appearance(selector, callback) {
 }
 
 monitor_appearance('.ad_favorite', function() {
-	console.log('star_appeared', this, $(this));
+	const star = $(this);
+	console.log('star_appeared', star);
+	if (! star.hasClass('star')) {
+		star.addClass('star');
+		on_new_star_appeared(star);
+	}
 	update_star_appearance($(this));
 })
+
+function on_new_star_appeared(star) {
+	// ...
+}
 
 function update_star_appearance(star) {
 	var y = star.attr('id').split('_');
 	var ad_number = y[y.length-1];
 	console.log('updating visual star for ad number ' + ad_number);
-	var my_sprite = "https://s3-eu-west-1.amazonaws.com/perry-web-public-eu/yad2ext/sprite_maintable_repl.png";
 	// TODO: do this with CSS instead!
 	ad_prop_get(ad_number, function(prop) {
 		if (prop['favorite'] == true) {
@@ -70,35 +78,7 @@ function set_star_class(star, class_name) {
 }
 
 
-$(document).on('ready', '.ad_favorite', function(event) {
-	console.log("---indirect-star-ready");
-});
-$(document).on('show', '.ad_favorite', function(event) {
-	console.log("---indirect-star-show");
-});
-$(document).on('load', '.ad_favorite', function(event) {
-	console.log("---indirect-star-load");
-});
-
-
-$(function() {
-	console.log("content.js doc ready start")
-	$(".WordSection1").click(function() { console.log('---word'); })
-	console.log("content.js doc ready done")
-});
-
-chrome.storage.onChanged.addListener(function(changes, namespace) {
-	for (key in changes) {
-		var storageChange = changes[key];
-		console.log('Storage key "%s" in namespace "%s" changed. ' +
-			'Old -> New:',
-			key,
-			namespace,
-			storageChange.oldValue,
-			storageChange.newValue
-		);
-	}
-});
+// star mouse events
 
 function star_click(event) {
 	const clickedElement = $(event.target);
