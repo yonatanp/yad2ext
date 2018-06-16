@@ -18,6 +18,30 @@ $(document).on('dblclick', '.ad_favorite', function(event) {
 });
 
 
+// should update dynamically. for now, it's constant.
+options = {
+	hide_blacklist: true,
+};
+
+function apply_options() {
+	showhide_blacklist_ad($('.star'));
+}
+
+function showhide_blacklist_ad(star) {
+	bl_rows = star.filter(".star-blacklist").closest("tr[id^=tr_Ad]");
+	if (options.hide_blacklist) {
+		bl_rows.fadeOut();
+	}
+	else {
+		bl_rows.fadeIn();
+	}
+}
+
+$(document).on('star-class-changed', '.star', function(event) {
+	showhide_blacklist_ad($(event.target));
+});
+
+
 // the 90's keep calling my web browser
 function monitor_appearance(selector, callback) {
 	setInterval(function() {
@@ -34,7 +58,7 @@ monitor_appearance('.ad_favorite', function() {
 		star.addClass('star');
 		on_new_star_appeared(star);
 	}
-	update_star_appearance($(this));
+	update_star_appearance(star);
 })
 
 function on_new_star_appeared(star) {
@@ -74,6 +98,7 @@ function set_star_class(star, class_name) {
 		star.removeClass('star-unseen');
 		star.addClass('star-' + class_name);
 		star.fadeIn('fast');
+		star.trigger("star-class-changed");
 	});
 }
 
