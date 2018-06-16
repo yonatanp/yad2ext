@@ -18,9 +18,40 @@ $(document).on('dblclick', '.ad_favorite', function(event) {
 });
 
 
-// should update dynamically. for now, it's constant.
+// these are the defaults in case nothing is stored in sync storage.
 options = {
 	hide_blacklist: true,
+};
+
+function load_options(callback) {
+	chrome.storage.sync.get(null, function(items) {
+		for (var key in items) {
+			if (key.match("options_")) {
+				const member = key.split("options_")[1];
+				options[member] = items[key];
+			}
+		}
+		callback();
+	});
+	$(document)
+}
+
+function monitor_options_change() {
+	chrome.storage.onChanged.addListener(function(changes, namespace) {
+		options_changed = false;
+		for (key in changes) {
+			if (namespace == "sync" && key.match("options_")) {
+				const member = key.split("options_")[1];
+				const storageChange = changes[key];
+				options[member] = storageChange.newValue;
+				options_changed = true;
+				console.log('options changed: %s was %s and now %s', member, storageChange.oldValue, storageChange.newValue);
+			}
+		}
+		if (options_changed) {
+			apply_options();
+		}
+	});
 };
 
 function apply_options() {
@@ -36,6 +67,9 @@ function showhide_blacklist_ad(star) {
 		bl_rows.fadeIn();
 	}
 }
+
+// load and start monitoring
+load_options(monitor_options_change);
 
 $(document).on('star-class-changed', '.star', function(event) {
 	showhide_blacklist_ad($(event.target));
@@ -223,6 +257,16 @@ function ad_prop_set(ad_id, prop_dict, on_complete) {
 		return Object.assign({}, prop, prop_dict);
 	}, on_complete)
 }
+
+
+// add some control elements
+$("body").append($('<a href="#" class="opt-toggle">toggle view blacklist</a>').click(function() {
+	chrome.storage.sync.get(['options_hide_blacklist'], function(items) {
+	    chrome.storage.sync.set({options_hide_blacklist: !items['options_hide_blacklist']});
+	});
+	return false;
+}));
+
 
 
 console.log("content.js done")
