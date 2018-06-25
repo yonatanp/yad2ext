@@ -28,7 +28,8 @@
         "js": [
             "js/jquery-1.9.1.min.js",
             "js/debug.js",
-            "js/content.js"
+            "js/content.js",
+            "js/inject_favorites.js"
         ],
         "matches": ["http://www.yad2.co.il/*"]
     }],

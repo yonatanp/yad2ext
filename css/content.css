@@ -86,9 +86,8 @@ div#main-about-text {
 }
 
 
-.opt-toggle {
+.corner-button {
     position: fixed;
-    bottom: 2em;
     left: 0px;
     text-decoration: none;
     color: #000000;
@@ -97,6 +96,14 @@ div#main-about-text {
     padding: 1em;
 }
 
-.opt-toggle:hover {    
+.corner-button:hover {    
     background-color: rgba(135, 135, 135, 0.50);
+}
+
+.cbtn-1 {
+    bottom: 2em;
+}
+
+.cbtn-2 {
+    bottom: 6em;
 }

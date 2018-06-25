@@ -260,7 +260,7 @@ function ad_prop_set(ad_id, prop_dict, on_complete) {
 
 
 // add some control elements
-$("body").append($('<a href="#" class="opt-toggle">toggle view blacklist</a>').click(function() {
+$("body").append($('<a href="#" class="corner-button cbtn-1">toggle view blacklist</a>').click(function() {
 	chrome.storage.sync.get(['options_hide_blacklist'], function(items) {
 	    chrome.storage.sync.set({options_hide_blacklist: !items['options_hide_blacklist']});
 	});
