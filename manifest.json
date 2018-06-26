@@ -24,7 +24,10 @@
     },
 
     "content_scripts": [{
-        "css": ["css/content.css"],
+        "css": [
+            "css/content.css",
+            "css/inject_images.css"
+        ],
         "js": [
             "js/jquery-1.9.1.min.js",
             "js/debug.js",

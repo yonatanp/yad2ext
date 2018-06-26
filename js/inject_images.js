@@ -16,6 +16,10 @@ function add_images_into_iframe(iframe) {
             return false;
         }
         console.log(table);
+        // first, inject style into the frame's head
+        const head = iframe.contents().find("head");
+        head.append($("<link/>", { rel: "stylesheet", href: "https://s3-eu-west-1.amazonaws.com/perry-web-public-eu/yad2ext/inject_images.css", type: "text/css" }));
+        // load images
         const id_tokens = iframe.attr("id").split("_");
         const cat_id = id_tokens[2];
         const sub_cat_id = id_tokens[3];
@@ -51,7 +55,7 @@ function load_images_for_ad(cat_id, sub_cat_id, ad_id, target_table) {
             window.imgdata = data;
             window.parent.imgdata = data;
             window.parent.parent.imgdata = data;
-            load_images(data, target_table);
+            load_images(data, target_table, ad_id);
         },
         error: function() {
             console.log("---failed fetching images page");
@@ -98,11 +102,23 @@ function match_images(page_data) {
     return unique_matches.sort();
 }
 
-function load_images(page_data, target_table) {
-    const images = match_images(page_data);
-    for (var i in images) {
-        $("<tr/>").append($("<img src='" + images[i] +"'></img>")).appendTo(target_table.find("> tbody"));
+function load_images(page_data, target_table, ad_id) {
+    if (ad_id == undefined) {
+        ad_id = "image";
     }
+    const images = match_images(page_data);
+    var tr = $("<tr/>");
+    var ul = $("<ul class='polaroids large-block-grid-4 small-block-grid-2'/>").appendTo(tr);
+    for (var i in images) {
+        ul.append(
+            $("<li/>").append(
+                $("<a href='" + images[i] + "' title='" + ad_id + " - " + i + "' target='_blank'/>").append(
+                    $("<img src='" + images[i] +"' alt='" + ad_id + " - " + i + "'></img>")
+                )
+            )
+        )
+    }
+    tr.appendTo(target_table.find("> tbody"));
 }
 
 function adjust_height_for_all_ad_frames() {
