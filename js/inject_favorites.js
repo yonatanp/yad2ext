@@ -8,16 +8,21 @@ function get_search_and_append(pageNumber, maxPage) {
         console.log("first page - clearing data_all");
         window.data_all = "";
     }
-    if (pageNumber == 15) {
+    if (pageNumber == 30) {
         console.log("page safety limit reached, aborting without finaization");
         return;
     }
 
-    const search_params = "multiSearch=1&arrArea=18,42,54,81,4,71,10&arrCity=&arrHomeTypeID=5&fromRooms=5.5&untilRooms=6.5&fromPrice=4500000&untilPrice=5700000&PriceType=1&fromSquareMeter=&untilSquareMeter=&FromFloor=&ToFloor=&Info=&PriceOnly=1&ImgOnly=1&AreaID=&City=&HomeTypeID=&arrAreaID=18,42,54,81,4,71,10";
+    // const search_params = "multiSearch=1&arrArea=18,42,54,81,4,71,10&arrCity=&arrHomeTypeID=5&fromRooms=5.5&untilRooms=6.5&fromPrice=4500000&untilPrice=5700000&PriceType=1&fromSquareMeter=&untilSquareMeter=&FromFloor=&ToFloor=&Info=&PriceOnly=1&ImgOnly=1&AreaID=&City=&HomeTypeID=&arrAreaID=18,42,54,81,4,71,10";
+    // var search_params = "multiSearch=1&arrArea=18%2C42%2C54%2C81%2C4%2C71%2C10&arrCity=&arrHomeTypeID=5%2C39%2C32&fromRooms=5&untilRooms=7&fromPrice=4500000&untilPrice=6000000&PriceType=1&fromSquareMeter=&untilSquareMeter=&FromFloor=&ToFloor=&Info=";
+    const pre_search = window.location.href.split("?")[0];
+    const search_params = window.location.search;
+    // note: even if "Page=..." appears in the search string, appending another one overrides it so we're good
+    const url = pre_search + search_params + "&Page=" + pageNumber
+    
     $.ajax({
         type: "GET",
-        url: "http://www.yad2.co.il/Nadlan/sales.php?" + search_params + "&Page=" + pageNumber,
-        // data: "CatID=" + CatID + "&SubCatID=" + SubCatID + "&Page=" + pageNumber,
+        url: url,
         dataType: 'html',
         async: true,
         success: function(data) {

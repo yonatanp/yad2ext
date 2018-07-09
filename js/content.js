@@ -79,9 +79,9 @@ $(document).on('star-class-changed', '.star', function(event) {
 // the 90's keep calling my web browser
 function monitor_appearance(selector, callback) {
 	setInterval(function() {
-	    $(selector+':not(.appeared)')
-	        .addClass('appeared')
-	        .each(callback);
+		$(selector+':not(.appeared)')
+			.addClass('appeared')
+			.each(callback);
 	}, 250);
 }
 
@@ -96,15 +96,42 @@ monitor_appearance('.ad_favorite', function() {
 })
 
 function on_new_star_appeared(star) {
-	// ...
+	// set first seen time (if never set before)
+	const ad_id = get_ad_id_from_star(star);
+	ad_prop_modify(ad_id, function(prop) {
+		if (prop['first_seen_time'] == undefined) {
+			const first_seen_time = Date.now();
+			console.log("ad %s first seen at %s", ad_id, first_seen_time);
+			prop['first_seen_time'] = first_seen_time;
+			set_star_tooltip(star, prop);
+			return prop;
+		}
+		else {
+			// no need to modify anything
+			console.log("ad %s already seen at %s", ad_id, prop['first_seen_time']);
+			set_star_tooltip(star, prop);
+			return undefined;
+		}
+	});
+}
+
+function set_star_tooltip(star, prop) {
+	const d_first_seen = new Date(prop['first_seen_time']);
+	const tooltip_text = "first seen: " + d_first_seen.toLocaleString();
+	star.attr("title", tooltip_text);
+}
+
+function get_ad_id_from_star(star) {
+	const y = star.attr('id').split('_');
+	const ad_id = y[y.length-1];
+	return ad_id;
 }
 
 function update_star_appearance(star) {
-	var y = star.attr('id').split('_');
-	var ad_number = y[y.length-1];
-	console.log('updating visual star for ad number ' + ad_number);
+	const ad_id = get_ad_id_from_star(star);
+	console.log('updating visual star for ad ' + ad_id);
 	// TODO: do this with CSS instead!
-	ad_prop_get(ad_number, function(prop) {
+	ad_prop_get(ad_id, function(prop) {
 		if (prop['favorite'] == true) {
 			// star-favorite (deep blue)
 			set_star_class(star, 'favorite');
@@ -141,11 +168,9 @@ function set_star_class(star, class_name) {
 
 function star_click(event) {
 	const clickedElement = $(event.target);
-	var y = clickedElement.attr('id').split('_');
-	var ad_number = y[y.length-1];
-	console.log('star clicked for ad number %s', ad_number);
-
-	ad_toggle_favorite(ad_number, function(new_prop) {
+	const ad_id = get_ad_id_from_star(clickedElement);
+	console.log('star clicked for ad number %s', ad_id);
+	ad_toggle_favorite(ad_id, function(new_prop) {
 		update_star_appearance(clickedElement);
 	});
 
@@ -154,27 +179,21 @@ function star_click(event) {
 
 function star_right_click(event) {
 	const clickedElement = $(event.target);
-	var y = clickedElement.attr('id').split('_');
-	var ad_number = y[y.length-1];
-	console.log('star right-clicked for ad number %s', ad_number);
-
-	ad_toggle_seen(ad_number, function(new_prop) {
+	const ad_id = get_ad_id_from_star(clickedElement);
+	console.log('star right-clicked for ad number %s', ad_id);
+	ad_toggle_seen(ad_id, function(new_prop) {
 		update_star_appearance(clickedElement);
 	});
-
 	return false;
 }
 
 function star_dblclick(event) {
 	const clickedElement = $(event.target);
-	var y = clickedElement.attr('id').split('_');
-	var ad_number = y[y.length-1];
-	console.log('star dbl-clicked for ad number %s', ad_number);
-
-	ad_toggle_blacklist(ad_number, function(new_prop) {
+	const ad_id = get_ad_id_from_star(clickedElement);
+	console.log('star dbl-clicked for ad number %s', ad_id);
+	ad_toggle_blacklist(ad_id, function(new_prop) {
 		update_star_appearance(clickedElement);
 	});
-
 	return false;
 }
 
@@ -229,26 +248,37 @@ function ad_toggle_field(ad_id, field, on_complete) {
 function ad_prop_get(ad_id, handler) {
 	var ad_key = "ad-" + ad_id;
 	chrome.storage.sync.get([ad_key], function(items) {
-	    window.items = items;
-	    prop = items[ad_key];
-	    console.log("ad_prop_get: prop for %s is", ad_key, prop);
-	    if (prop == undefined) {
-	    	prop = {};
-	    }
-	    handler(prop);
+		window.items = items;
+		prop = items[ad_key];
+		console.log("ad_prop_get: prop for %s is", ad_key, prop);
+		if (prop == undefined) {
+			prop = {};
+		}
+		handler(prop);
 	});
 }
 
 function ad_prop_modify(ad_id, modifier, on_complete) {
 	ad_prop_get(ad_id, function(prop) {
 		var ad_key = "ad-" + ad_id;
-	    console.log("ad_prop_modify: prop for %s before update is", ad_key, prop);
-	    var new_prop = modifier(prop);
-	    console.log("ad_prop_modify: prop for %s after update is", ad_key, prop);
-	    chrome.storage.sync.set({[ad_key]: new_prop }, function(){
-		    console.log("ad_prop_modify: prop update for %s done", ad_key);
-		    on_complete(new_prop);
-		});
+		console.log("ad_prop_modify: prop for %s before update is", ad_key, prop);
+		var new_prop = modifier(prop);
+		if (new_prop == undefined) {
+			// no modification
+			console.log("ad_prop_modify: prop for %s not changed, not saving, but completing", ad_key);
+			if (on_complete != undefined) {
+				on_complete(prop);
+			}
+		}
+		else {
+			console.log("ad_prop_modify: prop for %s after update is", ad_key, new_prop);
+			chrome.storage.sync.set({[ad_key]: new_prop }, function(){
+				console.log("ad_prop_modify: prop update for %s done", ad_key);
+				if (on_complete != undefined) {
+					on_complete(new_prop);
+				}
+			});
+		}
 	});
 }
 
@@ -262,7 +292,7 @@ function ad_prop_set(ad_id, prop_dict, on_complete) {
 // add some control elements
 $("body").append($('<a href="#" class="corner-button cbtn-1">toggle view blacklist</a>').click(function() {
 	chrome.storage.sync.get(['options_hide_blacklist'], function(items) {
-	    chrome.storage.sync.set({options_hide_blacklist: !items['options_hide_blacklist']});
+		chrome.storage.sync.set({options_hide_blacklist: !items['options_hide_blacklist']});
 	});
 	return false;
 }));
