@@ -245,21 +245,29 @@ function ad_toggle_field(ad_id, field, on_complete) {
 	}, on_complete)
 }
 
+// group ads by their two last characters (least significant digits)
+function make_ad_group_key(ad_key) {
+	// return "group-EF" (for e.g. ad-ABCDEF)
+	return "group-" + ad_key.substr(ad_key.length-2);
+}
+
 function ad_prop_get(ad_id, handler) {
-	var ad_key = "ad-" + ad_id;
-	chrome.storage.sync.get([ad_key], function(items) {
+	const ad_key = "ad-" + ad_id;
+	const ad_group_key = make_ad_group_key(ad_key);
+	chrome.storage.sync.get([ad_group_key], function(items) {
 		window.items = items;
-		prop = items[ad_key];
+		const prop_group = items[ad_group_key];
+		prop = prop_group[ad_key];
 		console.log("ad_prop_get: prop for %s is", ad_key, prop);
 		if (prop == undefined) {
 			prop = {};
 		}
-		handler(prop);
+		handler(prop, prop_group);
 	});
 }
 
 function ad_prop_modify(ad_id, modifier, on_complete) {
-	ad_prop_get(ad_id, function(prop) {
+	ad_prop_get(ad_id, function(prop, prop_group) {
 		var ad_key = "ad-" + ad_id;
 		console.log("ad_prop_modify: prop for %s before update is", ad_key, prop);
 		var new_prop = modifier(prop);
@@ -272,7 +280,9 @@ function ad_prop_modify(ad_id, modifier, on_complete) {
 		}
 		else {
 			console.log("ad_prop_modify: prop for %s after update is", ad_key, new_prop);
-			chrome.storage.sync.set({[ad_key]: new_prop }, function(){
+			const ad_group_key = make_ad_group_key(ad_key);
+			prop_group[ad_key] = new_prop;
+			chrome.storage.sync.set({[ad_group_key]: prop_group }, function(){
 				console.log("ad_prop_modify: prop update for %s done", ad_key);
 				if (on_complete != undefined) {
 					on_complete(new_prop);
