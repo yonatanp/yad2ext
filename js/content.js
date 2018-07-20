@@ -59,12 +59,15 @@ function apply_options() {
 }
 
 function showhide_blacklist_ad(star) {
-	bl_rows = star.filter(".star-blacklist").closest("tr[id^=tr_Ad]");
+	bl_ad_rows = star.filter(".star-blacklist").closest("tr[id^=tr_Ad]");
+	bl_info_rows = bl_ad_rows.next();
 	if (options.hide_blacklist) {
-		bl_rows.fadeOut();
+		bl_ad_rows.fadeOut();
+		bl_info_rows.fadeOut();
 	}
 	else {
-		bl_rows.fadeIn();
+		bl_ad_rows.fadeIn();
+		bl_info_rows.fadeIn();
 	}
 }
 
