@@ -118,7 +118,7 @@ function on_new_star_appeared(star) {
 function set_star_tooltip(star, prop) {
 	const d_first_seen = new Date(prop['first_seen_time']);
 	const tooltip_text = "first seen: " + d_first_seen.toLocaleString();
-	star.attr("title", tooltip_text);
+	star.attr("title", tooltip_text).attr("data-first-seen-iso", d_first_seen.toISOString());
 }
 
 function get_ad_id_from_star(star) {
@@ -307,6 +307,67 @@ $("body").append($('<a href="#" class="corner-button cbtn-1">toggle view blackli
 	return false;
 }));
 
+
+function sort_ads_all(sort_key, direction) {
+	sort_ads_under($("#main_table"), sort_key, direction);
+	sort_ads_under($("#my_table"), sort_key, direction);
+	sort_ads_under($("#tiv_main_table"), sort_key, direction);
+	sort_ads_under($("#tiv_my_table"), sort_key, direction);
+}
+
+function sort_ads_under($top_elem, sort_key, direction) {
+	if (direction == undefined) {
+		direction = 'descending';
+	}
+	var $tbody=$top_elem.find(".main_table tbody").first();
+	var ad_rows = $tbody.find("tr[id*=Ad_]").get();
+	ad_rows.sort(function(a, b) {
+		var keyA = sort_key($(a)) + "/" + consistent_tie_breaker($(a));
+		var keyB = sort_key($(b)) + "/" + consistent_tie_breaker($(b));
+		if (keyA < keyB) return 1;
+		if (keyA > keyB) return -1;
+		return 0;
+	});
+	if (direction == 'ascending') {
+		ad_rows.reverse();
+	}
+	$.each(ad_rows, function(index, ad_row) {
+		var info_row = $(ad_row).next();
+		$tbody.append(ad_row);
+		$tbody.append(info_row);
+	});
+}
+
+function consistent_tie_breaker($ad_tr) {
+	return get_ad_id_from_star($ad_tr.find(".star"));
+}
+
+function sort_key_first_seen($ad_tr) {
+	return $ad_tr.find(".star").attr("data-first-seen-iso");
+}
+
+function sort_key_star_class($ad_tr) {
+	return $ad_tr.find(".star").attr("class").split(" ").filter(function(s) { return s.startsWith("star-"); }).join(",");
+}
+
+function sort_key_star_class_first_seen($ad_tr) {
+	return sort_key_star_class($ad_tr) + "/" + sort_key_first_seen($ad_tr);
+}
+
+$("body").append($('<a href="#" class="corner-button cbtn-3">sort by first seen</a>').click(function() {
+    sort_ads_all(sort_key_first_seen, 'descending');
+    return false;
+}));
+
+$("body").append($('<a href="#" class="corner-button cbtn-4">sort by star class</a>').click(function() {
+    sort_ads_all(sort_key_star_class, 'descending');
+    return false;
+}));
+
+$("body").append($('<a href="#" class="corner-button cbtn-5">sort by S.C. -> F.S.</a>').click(function() {
+    sort_ads_all(sort_key_star_class_first_seen, 'descending');
+    return false;
+}));
 
 
 console.log("content.js done")
