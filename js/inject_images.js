@@ -104,50 +104,85 @@ function load_map(page_data, target_table) {
     tr.append(div_ad_map.append(div_map_canvas));
     tr.appendTo(target_table.find("> tbody"));
 
-    // // test:
-    // execute_on_document(document, function() {
-    //     console.log("before we load ourselves: here is window.google", window.google);
-    // });
+    // test:
+    execute_on_document(document, function() {
+        console.log("before we load ourselves: here is window.google", window.google);
+    });
 
-    // const iframe_document = target_table[0].ownerDocument;
-    // execute_on_document(iframe_document, function() {
-    //     console.log("before we load ourselves (iframe document): here is window.google", window.google);
-    // });
+    const iframe_document = target_table[0].ownerDocument;
+    execute_on_document(iframe_document, function() {
+        console.log("before we load ourselves (iframe document): here is window.google", window.google);
+    });
 
     const maps_api_key = "AIzaSyAj8yjjNky7vqe9XYtCxP01d6InDTV3vAg";
     const maps_api_url = "http://maps.googleapis.com/maps/api/js?key=" + maps_api_key + "&libraries=drawing,geometry&sensor=false&&region=IL&language=he";
-    
+
+    function run_in_context_of_iframe(passed_param_dict) {
+        const map_canvas_unique_id = passed_param_dict.map_canvas_unique_id;
+        const mapOptions = passed_param_dict.mapOptions;
+        const maps_api_url = passed_param_dict.maps_api_url;
+        console.log("the map_canvas_unique_id is", map_canvas_unique_id);
+        console.log("in context of iframe, window.google is initially", window.google);
+        $.getScript(maps_api_url).done(function(script, textStatus) {
+            console.log("loaded google maps framework with a status of " + textStatus);
+            console.log("in context of iframe, window.google is now", window.google);
+            $f = $("table.innerDetails_table");
+            if ($f.length > 0) {
+                console.log("found f in the context of the iframe:", $f);
+                $p = $f.find('#' + map_canvas_unique_id);
+                if ($p.length > 0) {
+                    console.log("this iframe's f p:", $p);
+                    $p.html("LA LA LA LA LA " + map_canvas_unique_id);
+                    window.g = new window.google.maps.Map($p[0], {
+                        center: {lat: mapOptions.lat, lng: mapOptions.lng},
+                        zoom: mapOptions.zoom
+                    });
+                }
+            }
+            else {
+                console.error("no f found in context of the iframe!")
+            }
+        })
+    }
+
+    execute_on_document(iframe_document, run_in_context_of_iframe, {
+        map_canvas_unique_id: map_canvas_unique_id,
+        mapOptions: mapOptions,
+        maps_api_url: maps_api_url
+    });
+
+
     // // warning: are we loading this maps script infinite times? --> CHECK NETWORK TAB
     // $.getScript(maps_api_url).done(function(script, textStatus) {
     //     console.log("loaded google maps framework with a status of " + textStatus);
 
-        function run_in_context_of_document_window(passed_param_dict) {
-            console.log("in context, window.google is", window.google);
-            const map_canvas_unique_id = passed_param_dict.map_canvas_unique_id;
-            const mapOptions = passed_param_dict.mapOptions;
-            console.log("the map_canvas_unique_id is", map_canvas_unique_id);
-            $("iframe.ad_iframe").each(function() {
-                console.log("this iframe:", $(this));
-                $f = $(this).contents().find("table.innerDetails_table");
-                if ($f.length > 0) {
-                    console.log("this iframe's f:", $f);
-                    $p = $f.find('#' + map_canvas_unique_id);
-                    if ($p.length > 0) {
-                        console.log("this iframe's f p:", $p);
-                        $p.html("LA LA LA LA LA " + map_canvas_unique_id);
-                        window.g = new window.google.maps.Map($p[0], {
-                            center: {lat: mapOptions.lat, lng: mapOptions.lng},
-                            zoom: mapOptions.zoom
-                        });
-                    }
-                }
-            })
-        }
+        // function run_in_context_of_document_window(passed_param_dict) {
+        //     console.log("in context, window.google is", window.google);
+        //     const map_canvas_unique_id = passed_param_dict.map_canvas_unique_id;
+        //     const mapOptions = passed_param_dict.mapOptions;
+        //     console.log("the map_canvas_unique_id is", map_canvas_unique_id);
+        //     $("iframe.ad_iframe").each(function() {
+        //         console.log("this iframe:", $(this));
+        //         $f = $(this).contents().find("table.innerDetails_table");
+        //         if ($f.length > 0) {
+        //             console.log("this iframe's f:", $f);
+        //             $p = $f.find('#' + map_canvas_unique_id);
+        //             if ($p.length > 0) {
+        //                 console.log("this iframe's f p:", $p);
+        //                 $p.html("LA LA LA LA LA " + map_canvas_unique_id);
+        //                 window.g = new window.google.maps.Map($p[0], {
+        //                     center: {lat: mapOptions.lat, lng: mapOptions.lng},
+        //                     zoom: mapOptions.zoom
+        //                 });
+        //             }
+        //         }
+        //     })
+        // }
 
-        execute_on_document(document, run_in_context_of_document_window, {
-            map_canvas_unique_id: map_canvas_unique_id,
-            mapOptions: mapOptions
-        });
+        // execute_on_document(document, run_in_context_of_document_window, {
+        //     map_canvas_unique_id: map_canvas_unique_id,
+        //     mapOptions: mapOptions
+        // });
     // });
 }
 
