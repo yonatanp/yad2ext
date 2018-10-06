@@ -251,7 +251,19 @@ function ad_toggle_field(ad_id, field, on_complete) {
 // group ads by their two last characters (least significant digits)
 function make_ad_group_key(ad_key) {
 	// return "group-EF" (for e.g. ad-ABCDEF)
-	return "group-" + ad_key.substr(ad_key.length-2);
+	const last_two = ad_key.substr(ad_key.length-2);
+	var group_code = null;
+	if (!!last_two.match(/\d\d/)) {
+		group_code = last_two;
+	}
+	else {
+		// non-digits are (to date) hex codes, so we bring them to [00-99] range
+		group_code = '' + (eval('0x' + last_two) % 100);
+		if (group_code.length == 1) {
+			group_code = '0' + group_code;
+		}
+	}
+	return "group-" + group_code;
 }
 
 function ad_prop_get(ad_id, handler) {
